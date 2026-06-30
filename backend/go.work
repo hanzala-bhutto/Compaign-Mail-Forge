@@ -1,0 +1,9 @@
+go 1.23.0
+
+use (
+	./shared/events
+	./services/campaign-service
+	./services/send-service
+	./services/analytics-service
+	./services/api-gateway
+)

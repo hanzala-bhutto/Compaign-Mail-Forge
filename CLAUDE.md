@@ -14,32 +14,38 @@ A full-stack production-patterned **email campaign platform** with a Go microser
 
 ## Monorepo Structure
 
+One repo, two top-level folders — backend and frontend are separated but versioned together.
+
 ```
 GoLang/
-├── services/
-│   ├── campaign-service/     # CRUD for campaigns; publishes Kafka events
-│   ├── send-service/         # Consumes send events; calls email provider
-│   ├── analytics-service/    # Consumes all events; HTTP for metrics + webhooks
-│   └── api-gateway/          # Thin reverse proxy; single external entry point
-├── frontend/                 # React + Tailwind + Shadcn dashboard
+├── backend/
+│   ├── services/
+│   │   ├── campaign-service/     # CRUD for campaigns; publishes Kafka events
+│   │   ├── send-service/         # Consumes send events; calls email provider
+│   │   ├── analytics-service/    # Consumes all events; HTTP for metrics + webhooks
+│   │   └── api-gateway/          # Thin reverse proxy; single external entry point
+│   ├── shared/
+│   │   └── events/               # Canonical Kafka event schemas (shared Go module)
+│   ├── database/
+│   │   └── migrations/
+│   │       ├── campaign-service/
+│   │       └── analytics-service/
+│   ├── docker-compose.yml        # Kafka (KRaft) + dual Postgres
+│   ├── go.work                   # Go workspace — ties all modules together
+│   └── Makefile                  # Backend orchestration
+├── frontend/
 │   ├── src/
-│   │   ├── components/       # Shadcn + custom components
-│   │   ├── pages/            # Route-level page components
-│   │   ├── hooks/            # Custom React hooks (data fetching etc.)
-│   │   ├── lib/              # API client, utils
-│   │   └── types/            # TypeScript types mirroring backend domain
+│   │   ├── components/           # Shadcn + custom components
+│   │   ├── pages/                # Route-level page components
+│   │   ├── hooks/                # Custom React hooks (TanStack Query)
+│   │   ├── lib/                  # API client (api.ts), utils (cn)
+│   │   └── types/                # TypeScript types mirroring backend JSON
 │   ├── package.json
-│   └── vite.config.ts
-├── shared/
-│   └── events/               # Canonical Kafka event schemas (shared Go module)
-├── database/
-│   └── migrations/
-│       ├── campaign-service/
-│       └── analytics-service/
-├── examples/                 # Progressive Go learning examples (01-04)
-├── docs/                     # Roadmap and implementation guides
-├── docker-compose.yml        # Kafka (KRaft) + dual Postgres
-└── Makefile                  # Top-level orchestration
+│   └── vite.config.ts            # Proxies /api → :8080
+├── examples/                     # Progressive Go learning examples (01-04)
+├── docs/                         # Roadmap and implementation guides
+├── CLAUDE.md
+└── README.md
 ```
 
 ## Service Ports
@@ -122,14 +128,15 @@ services/<name>/
 ## Development Workflow
 
 ```bash
-# Start infrastructure
-docker compose up -d
+# Start infrastructure (from backend/)
+cd backend
+make infra
 
-# Run services (separate terminals)
+# Run services (separate terminals, all from backend/)
+make run-gateway
 make run-campaign
 make run-send
 make run-analytics
-make run-gateway
 
 # Test end-to-end
 curl -X POST localhost:8080/campaigns -d '{"name":"Launch","subject":"Welcome","body":"Hello","audience_id":"abc"}'

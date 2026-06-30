@@ -1,5 +1,32 @@
+# Binaries
 bin/
+dist/
+
+# Environment
 .env
+.env.local
+.env.*.local
+
+# Go
+*.out
 coverage.out
-*.log
+go.work.sum
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Editor
 .vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
