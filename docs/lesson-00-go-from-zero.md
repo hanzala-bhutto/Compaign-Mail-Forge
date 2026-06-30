@@ -1,80 +1,106 @@
-﻿# Lesson 0: Go From Absolute Zero
+# Starting from zero
 
-This lesson assumes you know nothing about Go.
+I wrote this when I had no idea how Go worked. If you're in the same spot, start here.
 
-Goal for today:
-- Run one Go file
-- Understand what `package main` and `func main()` mean
-- Learn variables, functions, if, for, and structs at a basic level
-
-## 1) Run your first Go program
-
-From repo root:
+## First thing — just run something
 
 ```powershell
-go run ./examples/01-hello
+go run ./examples/01-run
 ```
 
-You should see: `Hello, MailForge!`
+You should see `Hello, MailForge!`. That's it. You just ran a Go program.
 
-## 2) Smallest program explained
+Open `examples/01-run/main.go` and you'll see three things:
 
-Open `examples/01-hello/main.go`.
+```go
+package main    // this file is a runnable program
 
-- `package main`: this file is an executable app
-- `import "fmt"`: use the print library
-- `func main()`: program starts here
+import "fmt"    // fmt handles printing
 
-## 3) Variables and types
+func main() {   // execution starts here
+    fmt.Println("Hello, MailForge!")
+}
+```
 
-Run:
+Every executable Go program has exactly one `package main` and one `func main()`. That's the entry point. Everything else flows from there.
+
+## Variables
 
 ```powershell
 go run ./examples/02-variables
 ```
 
-Learn:
-- `:=` creates a variable
-- `var` also creates variables
-- basic types: `string`, `int`, `bool`
+Two ways to declare a variable:
 
-## 4) Functions, if, and for loop
+```go
+name := "MailForge"        // short, inferred type, only inside functions
+var port int = 8080        // explicit, can be at package level
+```
 
-Run:
+You'll see `:=` everywhere in this codebase. It's just the shorter form.
+
+## Functions
 
 ```powershell
 go run ./examples/03-functions
 ```
 
-Learn:
-- how to define a function
-- how `if` works
-- Go's single loop: `for`
+```go
+func greet(name string) string {
+    return "Hello, " + name
+}
+```
 
-## 5) Structs (very important for backend)
+Go functions can return multiple values. This is how errors work:
 
-Run:
+```go
+func divide(a, b float64) (float64, error) {
+    if b == 0 {
+        return 0, errors.New("cannot divide by zero")
+    }
+    return a / b, nil
+}
+```
+
+You'll see `(value, error)` return signatures everywhere. Always check the error.
+
+## Structs
 
 ```powershell
 go run ./examples/04-structs
 ```
 
-Learn:
-- struct = custom data type
-- fields and methods
+A struct is a custom type that groups related data:
 
-## 6) Tiny challenge (5 minutes)
+```go
+type Campaign struct {
+    Name    string
+    Subject string
+}
+```
 
-Create `examples/05-challenge/main.go` and do this:
-1. Make a `User` struct with `Name` and `Email`
-2. Print: `Welcome <Name>`
-3. Add function `isValidEmail(email string) bool` that checks `@`
+You can attach methods to structs:
 
-## 7) What we do next (Lesson 1)
+```go
+func (c Campaign) Summary() string {
+    return c.Name + " | " + c.Subject
+}
+```
 
-After this lesson, we connect basics to your backend:
-- Build one simple HTTP endpoint: `GET /hello`
-- Return JSON
-- Explain every line slowly
+This is basically the same `Campaign` that lives in the real `campaign-service`. The concept doesn't change — it just gets more fields and more methods.
 
-If anything is unclear, copy one line and ask: "Explain this like I am 10." We will do exactly that.
+## A small challenge
+
+Make `examples/05-challenge/main.go` with this:
+
+1. A `User` struct with `Name` and `Email` fields
+2. A method `Greet()` that returns `"Hey, <Name>!"`
+3. A function `isValidEmail(email string) bool` that returns true if the email contains `@`
+
+Run it with `go run ./examples/05-challenge`. If it prints something sensible you're ready to look at the actual service code.
+
+## Where to go from here
+
+Once the struct example clicks, open `services/campaign-service/internal/domain/campaign.go`. It's the same idea — a struct with fields and methods — just wired into a real system.
+
+The jump from "hello world" to "microservice" is mostly just more files doing the same things you already understand.
